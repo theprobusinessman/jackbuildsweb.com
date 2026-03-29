@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JackBuildsWebsites</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0a; --border: #1e1e1e; --accent: #c8f542;
+      --accent-dim: #9dbf30; --text: #f0f0f0; --muted: #666; --card-bg: #141414;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-weight: 300;
+      overflow-x: hidden; min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 3rem; height: 72px;
+      background: rgba(10,10,10,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border); transition: box-shadow 0.3s;
+    }
+    header.scrolled { box-shadow: 0 4px 40px rgba(0,0,0,0.6); }
+    .logo {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.55rem;
+      letter-spacing: 0.08em; color: var(--accent); text-decoration: none; cursor: pointer;
+    }
+    .logo span { color: var(--text); }
+    nav { display: flex; gap: 2.2rem; }
+    nav a {
+      text-decoration: none; color: var(--muted); font-size: 0.82rem;
+      letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; cursor: pointer;
+    }
+    nav a:hover { color: var(--text); }
+    .header-cta {
+      background: var(--accent); color: #0a0a0a; border: none;
+      padding: 0.55rem 1.35rem; font-family: 'DM Sans', sans-serif;
+      font-weight: 500; font-size: 0.82rem; letter-spacing: 0.06em;
+      text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.15s;
+    }
+    .header-cta:hover { background: var(--accent-dim); transform: translateY(-1px); }
+
+    /* HAMBURGER */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 4px; background: none; border: none;
+    }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); transition: all 0.3s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* MOBILE NAV */
+    .mobile-nav {
+      display: none; position: fixed; top: 72px; left: 0; right: 0;
+      background: #0f0f0f; border-bottom: 1px solid var(--border);
+      flex-direction: column; padding: 1.5rem 2rem; gap: 1.2rem; z-index: 99;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      text-decoration: none; color: var(--muted); font-size: 1rem;
+      letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: color 0.2s;
+    }
+    .mobile-nav a:hover { color: var(--text); }
+
+    /* MAIN */
+    main {
+      min-height: calc(100vh - 72px - 80px);
+      display: flex; flex-direction: column; align-items: center; padding: 6rem 2rem 5rem;
+    }
+
+    /* TITLE BLOCK */
+    .title-block {
+      text-align: center; margin-bottom: 5rem;
+      opacity: 0; transform: translateY(22px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .title-block.visible { opacity: 1; transform: translateY(0); }
+    .eyebrow {
+      display: inline-block; font-size: 0.72rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent);
+      padding: 0.3rem 0.9rem; margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-family: 'Bebas Neue', sans-serif; font-size: clamp(3.5rem, 8vw, 7rem);
+      letter-spacing: 0.04em; line-height: 0.95; color: var(--text);
+    }
+    h1 span { color: var(--accent); }
+    .subtitle {
+      margin-top: 1.4rem; color: var(--muted); font-size: 1rem;
+      max-width: 42ch; line-height: 1.7; margin-left: auto; margin-right: auto;
+    }
+    .typed-cursor {
+      display: inline-block; width: 3px; height: 0.85em; background: var(--accent);
+      margin-left: 4px; vertical-align: middle; animation: blink 0.8s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* CARDS */
+    .cards {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; width: 100%; max-width: 1100px;
+    }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      padding: 2.5rem 2.2rem; position: relative; overflow: hidden;
+      cursor: pointer; opacity: 0; transform: translateY(22px);
+      transition: opacity 0.6s ease, transform 0.6s ease, border-color 0.3s, box-shadow 0.3s;
+    }
+    .card.visible { opacity: 1; transform: translateY(0); }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: var(--accent);
+      transform: scaleX(0); transform-origin: left; transition: transform 0.35s ease;
+    }
+    .card:hover { border-color: #2e2e2e; transform: translateY(-6px); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+    .card:hover::before { transform: scaleX(1); }
+    .card-number {
+      font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem;
+      color: var(--border); line-height: 1; margin-bottom: 1.2rem; transition: color 0.3s;
+    }
+    .card:hover .card-number { color: #282828; }
+    .card-text { font-size: 1.15rem; font-weight: 500; color: var(--text); letter-spacing: 0.01em; line-height: 1.5; margin-bottom: 0.8rem; }
+    .card-sub { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.04em; }
+    .card-link {
+      display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 1.8rem;
+      font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent); background: none; border: none;
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: gap 0.2s;
+    }
+    .card-link:hover { gap: 0.7rem; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px); z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #111; border: 1px solid #2a2a2a; padding: 2.5rem;
+      width: 90%; max-width: 480px; position: relative;
+      transform: translateY(20px); transition: transform 0.3s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1.2rem;
+      background: none; border: none; color: var(--muted); font-size: 1.4rem;
+      cursor: pointer; transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal h2 {
+      font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
+      letter-spacing: 0.05em; color: var(--text); margin-bottom: 0.5rem;
+    }
+    .modal p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1.5rem; }
+    .modal input, .modal textarea {
+      width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+      padding: 0.75rem 1rem; margin-bottom: 0.9rem; outline: none;
+      transition: border-color 0.2s; resize: none;
+    }
+    .modal input:focus, .modal textarea:focus { border-color: var(--accent); }
+    .modal input::placeholder, .modal textarea::placeholder { color: #444; }
+    .modal-submit {
+      width: 100%; background: var(--accent); color: #0a0a0a; border: none;
+      padding: 0.85rem; font-family: 'DM Sans', sans-serif; font-weight: 500;
+      font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+    }
+    .modal-submit:hover { background: var(--accent-dim); }
+    .modal-submit:active { transform: scale(0.98); }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent); color: #0a0a0a;
+      padding: 0.75rem 1.8rem; font-size: 0.85rem; font-weight: 500;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      opacity: 0; pointer-events: none; z-index: 300;
+      transition: opacity 0.3s, transform 0.3s; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border); min-height: 80px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 3rem; flex-wrap: wrap; gap: 0.8rem;
+    }
+    .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.1em; color: var(--muted); }
+    .footer-copy { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.04em; }
+    .footer-links { display: flex; gap: 1.8rem; }
+    .footer-links a {
+      text-decoration: none; font-size: 0.72rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--muted); transition: color 0.2s; cursor: pointer;
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    /* RESPONSIVE */
+    @media (max-width: 860px) {
+      .cards { grid-template-columns: 1fr; max-width: 480px; }
+      header { padding: 0 1.5rem; }
+      nav, .header-cta { display: none; }
+      .hamburger { display: flex; }
+      footer { flex-direction: column; text-align: center; padding: 1.5rem; }
+      .footer-links { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header id="header">
+    <a class="logo" onclick="scrollToTop()">JackBuilds<span>Websites</span></a>
+    <nav>
+      <a onclick="scrollToSection('cards')">Work</a>
+      <a onclick="scrollToSection('cards')">Services</a>
+      <a onclick="openModal('about')">About</a>
+      <a onclick="openModal('contact')">Contact</a>
+    </nav>
+    <button class="header-cta" onclick="openModal('contact')">Get Started</button>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- MOBILE NAV -->
+  <div class="mobile-nav" id="mobileNav">
+    <a onclick="scrollToSection('cards'); closeMobileNav()">Work</a>
+    <a onclick="scrollToSection('cards'); closeMobileNav()">Services</a>
+    <a onclick="openModal('about'); closeMobileNav()">About</a>
+    <a onclick="openModal('contact'); closeMobileNav()">Contact</a>
+  </div>
+
+  <!-- MAIN -->
+  <main>
+    <div class="title-block" id="titleBlock">
+      <div class="eyebrow">Web Design &amp; Development</div>
+      <h1>Build Something<br><span id="typedText"></span><span class="typed-cursor"></span></h1>
+      <p class="subtitle">Websites that turn heads, load fast, and convert visitors into customers.</p>
+    </div>
+
+    <div class="cards" id="cards">
+
+      <div class="card" onclick="openModal('card1')">
+        <div class="card-number">01</div>
+        <div class="card-text">This could be yours</div>
+        <div class="card-sub">©JackBuildsWebsites</div>
+        <button class="card-link">Learn more
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="card" onclick="openModal('card2')">
+        <div class="card-number">02</div>
+        <div class="card-text">This could be yours</div>
+        <div class="card-sub">©JackBuildsWebsites</div>
+        <button class="card-link">Learn more
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="card" onclick="openModal('card3')">
+        <div class="card-number">03</div>
+        <div class="card-text">This could be yours</div>
+        <div class="card-sub">©JackBuildsWebsites</div>
+        <button class="card-link">Learn more
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">JackBuildsWebsites</div>
+    <div class="footer-copy">© JackBuildsWebsites — All rights reserved</div>
+    <div class="footer-links">
+      <a onclick="openModal('privacy')">Privacy</a>
+      <a onclick="openModal('terms')">Terms</a>
+      <a onclick="openModal('contact')">Contact</a>
+    </div>
+  </footer>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal" id="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Scroll: header shadow
+    window.addEventListener('scroll', function () {
+      document.getElementById('header').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // Scroll helpers
+    function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    function scrollToSection(id) {
+      var el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Mobile nav
+    function toggleMobileNav() {
+      document.getElementById('mobileNav').classList.toggle('open');
+      document.getElementById('hamburger').classList.toggle('open');
+    }
+    function closeMobileNav() {
+      document.getElementById('mobileNav').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+    }
+
+    // Typed text animation
+    var phrases = ['Worth Seeing.', 'That Converts.', 'That Lasts.', 'With Purpose.'];
+    var pIdx = 0, cIdx = 0, deleting = false;
+    var typedEl = document.getElementById('typedText');
+    function type() {
+      var cur = phrases[pIdx];
+      if (!deleting) {
+        typedEl.textContent = cur.slice(0, cIdx + 1);
+        cIdx++;
+        if (cIdx === cur.length) { deleting = true; setTimeout(type, 1800); return; }
+      } else {
+        typedEl.textContent = cur.slice(0, cIdx - 1);
+        cIdx--;
+        if (cIdx === 0) { deleting = false; pIdx = (pIdx + 1) % phrases.length; }
+      }
+      setTimeout(type, deleting ? 55 : 90);
+    }
+
+    // Intersection Observer: fade-in on scroll
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.15 });
+    io.observe(document.getElementById('titleBlock'));
+    document.querySelectorAll('.card').forEach(function (card, i) {
+      card.style.transitionDelay = (0.1 + i * 0.12) + 's';
+      io.observe(card);
+    });
+
+    // Modal content map
+    var modals = {
+      contact: { title: 'Get In Touch', body: "Tell us about your project and we'll get back to you within 24 hours.", form: true },
+      about:   { title: 'About Jack', body: 'JackBuildsWebsites is a boutique web design studio crafting fast, modern websites that actually convert. We handle everything from design to launch — no templates, no fluff.', form: false },
+      card1:   { title: 'Spot Available', body: 'This placement is available for your business. A custom-built website designed to reflect your brand and drive real results.', form: true },
+      card2:   { title: 'Spot Available', body: 'Claim this spot and get a fully responsive, blazing-fast website built specifically for your business goals.', form: true },
+      card3:   { title: 'Spot Available', body: "Your brand deserves a website that works as hard as you do. Let's build something worth showing off.", form: true },
+      privacy: { title: 'Privacy Policy', body: 'We respect your privacy. Any information you share is used solely to communicate with you and fulfil your project. We do not sell or share your data with third parties.', form: false },
+      terms:   { title: 'Terms of Service', body: 'By engaging our services you agree to our standard terms. All work is covered by a written agreement before any project begins. © JackBuildsWebsites.', form: false }
+    };
+
+    function openModal(type) {
+      var d = modals[type] || { title: 'Info', body: '', form: false };
+      var html = '<h2>' + d.title + '</h2><p>' + d.body + '</p>';
+      if (d.form) {
+        html += '<input type="text" id="mName" placeholder="Your name" />' +
+                '<input type="email" id="mEmail" placeholder="Email address" />' +
+                '<textarea id="mMsg" rows="3" placeholder="Tell us about your project..."></textarea>' +
+                '<button class="modal-submit" onclick="submitForm()">Send Message</button>';
+      }
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+    function submitForm() {
+      var name  = document.getElementById('mName')  ? document.getElementById('mName').value  : '';
+      var email = document.getElementById('mEmail') ? document.getElementById('mEmail').value : '';
+      if (!name.trim() || !email.trim()) { showToast('Please fill in your name and email.'); return; }
+      closeModal();
+      showToast("Message sent! We'll be in touch soon.");
+    }
+
+    // Toast
+    var toastTimer;
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3200);
+    }
+
+    // Init
+    window.addEventListener('load', function () { setTimeout(type, 600); });
+  </script>
+</body>
+</html>
